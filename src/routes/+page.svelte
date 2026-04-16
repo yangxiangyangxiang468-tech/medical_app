@@ -30,9 +30,9 @@ let result:null|"success"|"fail"=null
 let mistakes:number[] = []
 const maxMistakes = 2
 
-let timer:any = null
+let timer:ReturnType<typeof setTimeout> | null = null
 let remainingTime:number = 0
-let interval:any = null
+let interval:ReturnType<typeof setInterval> | null = null
 
 const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms))
 $: cells = Array.from({length:gridSize*gridSize},(_,i)=>i)
@@ -249,7 +249,7 @@ function getClass(row:number, col:number){
 
 <div class="center">
 <div class="grid" style="grid-template-columns:repeat({gridSize},1fr)">
-{#each cells as i}
+{#each cells as i (i)}
 <button class="cell"
 class:active={activeIndex===i}
 on:click={()=>clickCell(i)}>
@@ -269,7 +269,7 @@ on:click={()=>clickCell(i)}>
 <div class="matrix-header">1</div>
 <div class="matrix-header">2</div>
 
-{#each sequence as _, row}
+{#each sequence as _item, row (row)}
   <div class="matrix-row-label">{row+1}</div>
 
   <div class={`matrix-cell ${getClass(row,0)}`}>
@@ -331,7 +331,7 @@ on:click={()=>clickCell(i)}>
 <!-- 中央 -->
 <div class="review-center">
 <div class="review-grid" style="--grid:{gridSize}">
-  {#each cells as i}
+  {#each cells as i (i)}
     <div class="review-cell"
   class:replay={replayIndex === i}
   class:okReplay={replayIndex === i && isReplayCorrect()}
@@ -356,7 +356,7 @@ on:click={()=>clickCell(i)}>
 <div>1回目</div>
 <div>2回目</div>
 
-{#each playLog as log, row}
+{#each playLog as log, row (row)}
   <div>{row+1}</div>
   <div>{log.correct}</div>
   <div>{log.inputs[0] ?? ""}</div>
