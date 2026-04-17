@@ -476,12 +476,21 @@ on:click={()=>clickCell(i)}>
  display:grid;
  grid-template-columns:40px 40px 40px;
  gap:5px;
+ align-items:center;
 }
 
 .matrix-header,
 .matrix-row-label{
+ width:40px;
+ height:40px;
+ display:flex;
+ align-items:center;
+ justify-content:center;
  text-align:center;
  font-weight:bold;
+ background:#999;
+ color:white;
+ border-radius:4px;
 }
 
 .matrix-cell{
