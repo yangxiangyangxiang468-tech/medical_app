@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>モックアップ</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: sans-serif; background: #f0f0f0; color: #222; }
+
+  /* ===== ナビ ===== */
+  nav {
+    background: #1565c0;
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  nav span { font-size: 18px; font-weight: bold; }
+  nav small { font-size: 13px; opacity: 0.8; }
+  nav .spacer { flex: 1; }
+  nav button {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+
+  /* ===== タブ ===== */
+  .tabs {
+    display: flex;
+    background: white;
+    border-bottom: 2px solid #ddd;
+    padding: 0 20px;
+  }
+  .tab {
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    color: #666;
+  }
+  .tab.active {
+    border-bottom-color: #1565c0;
+    color: #1565c0;
+    font-weight: bold;
+  }
+
+  /* ===== ページ ===== */
+  .page { display: none; padding: 20px; }
+  .page.active { display: block; }
+
+  /* ===== 患者一覧 ===== */
+  .search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .search-bar input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+  .btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  .btn-primary { background: #1565c0; color: white; }
+  .btn-outline { background: white; color: #1565c0; border: 1px solid #1565c0; }
+
+  table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+  th { background: #e3f2fd; padding: 10px 14px; text-align: left; font-size: 13px; color: #555; }
+  td { padding: 10px 14px; font-size: 14px; border-top: 1px solid #eee; }
+  tr:hover td { background: #f5f5f5; cursor: pointer; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+  .badge-blue { background: #e3f2fd; color: #1565c0; }
+  .badge-green { background: #e8f5e9; color: #2e7d32; }
+  .badge-red { background: #ffebee; color: #c62828; }
+
+  /* ===== 患者詳細 ===== */
+  .patient-header {
+    background: white;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .patient-avatar {
+    width: 56px; height: 56px;
+    background: #1565c0;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 22px; font-weight: bold;
+  }
+  .patient-info h2 { font-size: 20px; }
+  .patient-info p { font-size: 13px; color: #666; margin-top: 4px; }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    text-align: center;
+  }
+  .stat-card .num { font-size: 28px; font-weight: bold; color: #1565c0; }
+  .stat-card .label { font-size: 12px; color: #888; margin-top: 4px; }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+  }
+
+  /* ===== セッション詳細 ===== */
+  .session-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .card {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  }
+  .card h3 { font-size: 14px; font-weight: bold; color: #555; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 16px;
+    font-size: 13px;
+  }
+  .info-grid .key { color: #888; }
+  .info-grid .val { font-weight: bold; }
+
+  /* グリッド表示 */
+  .demo-grid {
+    display: grid;
+    gap: 6px;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+  }
+  .demo-cell {
+    background: #555;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: transparent;
+    position: relative;
+  }
+  .demo-cell.correct { background: #43a047; }
+  .demo-cell.wrong { background: #e53935; }
+  .demo-cell.sequence { background: #1565c0; }
+  .demo-cell span { color: white; font-weight: bold; }
+
+  .legend {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+    font-size: 12px;
+    justify-content: center;
+  }
+  .legend-item { display: flex; align-items: center; gap: 4px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+  /* ステップ表 */
+  .step-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .step-table th { background: #f5f5f5; padding: 6px 10px; text-align: center; font-size: 12px; color: #666; }
+  .step-table td { padding: 6px 10px; text-align: center; border-top: 1px solid #eee; }
+  .ok { color: #2e7d32; font-weight: bold; }
+  .ng { color: #c62828; font-weight: bold; }
+
+  /* 反応時間グラフ風 */
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 12px; }
+  .bar-label { width: 40px; text-align: right; color: #888; }
+  .bar-bg { flex: 1; background: #eee; border-radius: 4px; height: 16px; }
+  .bar-fill { height: 100%; border-radius: 4px; background: #1565c0; }
+  .bar-val { width: 50px; font-size: 12px; color: #555; }
+
+  .back-btn {
+    background: none;
+    border: none;
+    color: #1565c0;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <span>認知症検査アプリ</span>
+  <div class="spacer"></div>
+  <small>看護師A でログイン中</small>
+  <button onclick="showPage('game')">検査を始める</button>
+  <button>ログアウト</button>
+</nav>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('patients')">患者一覧</div>
+  <div class="tab" onclick="switchTab('detail')">患者詳細</div>
+  <div class="tab" onclick="switchTab('session')">検査詳細</div>
+</div>
+
+<!-- ===== 患者一覧 ===== -->
+<div class="page active" id="tab-patients">
+  <div style="max-width:900px; margin:0 auto;">
+    <div class="search-bar">
+      <input type="text" placeholder="患者名・院内番号で検索...">
+      <button class="btn btn-primary">＋ 患者を登録</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>院内番号</th>
+          <th>氏名</th>
+          <th>生年月日</th>
+          <th>直近の検査</th>
+          <th>検査回数</th>
+          <th>直近の結果</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr onclick="switchTab('detail')">
+          <td>A-00123</td>
+          <td><strong>田中 花子</strong></td>
+          <td>1945年3月12日（81歳）</td>
+          <td>2026-04-17</td>
+          <td><span class="badge badge-blue">12回</span></td>
+          <td><span class="badge badge-green">成功</span></td>
+        </tr>
+        <tr onclick="switchTab('detail')">
+          <td>A-00098</td>
+          <td><strong>鈴木 一郎</strong></td>
+          <td>1938年7月4日（87歳）</td>
+          <td>2026-04-15</td>
+          <td><span class="badge badge-blue">8回</span></td>
+          <td><span class="badge badge-red">失敗</span></td>
+        </tr>
+        <tr onclick="switchTab('detail')">
+          <td>B-00204</td>
+          <td><strong>佐藤 美代</strong></td>
+          <td>1950年11月22日（75歳）</td>
+          <td>2026-04-10</td>
+          <td><span class="badge badge-blue">3回</span></td>
+          <td><span class="badge badge-green">成功</span></td>
+        </tr>
+        <tr>
+          <td>B-00311</td>
+          <td><strong>山田 正雄</strong></td>
+          <td>1942年2月8日（84歳）</td>
+          <td>2026-03-28</td>
+          <td><span class="badge badge-blue">5回</span></td>
+          <td><span class="badge badge-red">失敗</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== 患者詳細 ===== -->
+<div class="page" id="tab-detail">
+  <div style="max-width:900px; margin:0 auto;">
+    <button class="back-btn" onclick="switchTab('patients')">← 患者一覧に戻る</button>
+
+    <div class="patient-header">
+      <div class="patient-avatar">田</div>
+      <div class="patient-info">
+        <h2>田中 花子</h2>
+        <p>院内番号：A-00123 ／ 1945年3月12日（81歳）</p>
+        <p style="margin-top:4px; color:#888;">備考：軽度認知障害疑い、週1回実施</p>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="num">12</div>
+        <div class="label">総検査回数</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" style="color:#2e7d32;">8</div>
+        <div class="label">成功回数</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" style="color:#c62828;">4</div>
+        <div class="label">失敗回数</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" style="color:#f57c00;">1,340</div>
+        <div class="label">平均反応時間 (ms)</div>
+      </div>
+    </div>
+
+    <div class="section-title">検査履歴</div>
+    <table>
+      <thead>
+        <tr>
+          <th>日時</th>
+          <th>グリッド</th>
+          <th>光の数</th>
+          <th>結果</th>
+          <th>総時間</th>
+          <th>平均反応時間</th>
+          <th>検査者</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr onclick="switchTab('session')" style="font-weight:bold;">
+          <td>2026-04-17 10:30</td>
+          <td>3×3</td>
+          <td>5回</td>
+          <td><span class="badge badge-green">成功</span></td>
+          <td>8.2秒</td>
+          <td>1,120ms</td>
+          <td>看護師A</td>
+        </tr>
+        <tr onclick="switchTab('session')">
+          <td>2026-04-10 14:15</td>
+          <td>3×3</td>
+          <td>5回</td>
+          <td><span class="badge badge-green">成功</span></td>
+          <td>9.8秒</td>
+          <td>1,340ms</td>
+          <td>看護師A</td>
+        </tr>
+        <tr onclick="switchTab('session')">
+          <td>2026-04-03 10:05</td>
+          <td>3×3</td>
+          <td>5回</td>
+          <td><span class="badge badge-red">失敗</span></td>
+          <td>15.3秒</td>
+          <td>1,890ms</td>
+          <td>看護師B</td>
+        </tr>
+        <tr onclick="switchTab('session')">
+          <td>2026-03-27 11:20</td>
+          <td>2×2</td>
+          <td>3回</td>
+          <td><span class="badge badge-green">成功</span></td>
+          <td>5.1秒</td>
+          <td>980ms</td>
+          <td>看護師A</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== セッション詳細 ===== -->
+<div class="page" id="tab-session">
+  <div style="max-width:900px; margin:0 auto;">
+    <button class="back-btn" onclick="switchTab('detail')">← 田中 花子 の履歴に戻る</button>
+
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+      <h2 style="font-size:18px;">2026-04-17 10:30 の検査</h2>
+      <span class="badge badge-green" style="font-size:14px;">成功</span>
+    </div>
+
+    <div class="session-layout">
+
+      <!-- 設定・結果 -->
+      <div class="card">
+        <h3>検査設定・結果</h3>
+        <div class="info-grid">
+          <span class="key">グリッド</span><span class="val">3×3</span>
+          <span class="key">光の数</span><span class="val">5回</span>
+          <span class="key">光の速度</span><span class="val">500ms</span>
+          <span class="key">光の間隔</span><span class="val">300ms</span>
+          <span class="key">総所要時間</span><span class="val">8.2秒</span>
+          <span class="key">検査者</span><span class="val">看護師A</span>
+        </div>
+      </div>
+
+      <!-- グリッド可視化 -->
+      <div class="card">
+        <h3>グリッド（正解と誤答の位置）</h3>
+        <div class="demo-grid" style="grid-template-columns: repeat(3,1fr);">
+          <div class="demo-cell"><span></span></div>
+          <div class="demo-cell sequence"><span>②</span></div>
+          <div class="demo-cell"><span></span></div>
+          <div class="demo-cell sequence"><span>④</span></div>
+          <div class="demo-cell correct"><span>①</span></div>
+          <div class="demo-cell wrong"><span>×</span></div>
+          <div class="demo-cell"><span></span></div>
+          <div class="demo-cell sequence"><span>③</span></div>
+          <div class="demo-cell sequence"><span>⑤</span></div>
+        </div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#1565c0"></div>正解セル</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#43a047"></div>1回で正解</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#e53935"></div>誤答あり</div>
+        </div>
+      </div>
+
+      <!-- ステップ詳細 -->
+      <div class="card">
+        <h3>ステップ詳細</h3>
+        <table class="step-table">
+          <thead>
+            <tr>
+              <th>手順</th>
+              <th>正解</th>
+              <th>1回目</th>
+              <th>2回目</th>
+              <th>反応時間</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td><td>セル4</td>
+              <td class="ok">○</td><td>—</td>
+              <td>1,200ms</td>
+            </tr>
+            <tr>
+              <td>2</td><td>セル1</td>
+              <td class="ng">×(セル3)</td><td class="ok">○</td>
+              <td>980ms</td>
+            </tr>
+            <tr>
+              <td>3</td><td>セル7</td>
+              <td class="ok">○</td><td>—</td>
+              <td>1,050ms</td>
+            </tr>
+            <tr>
+              <td>4</td><td>セル3</td>
+              <td class="ok">○</td><td>—</td>
+              <td>890ms</td>
+            </tr>
+            <tr>
+              <td>5</td><td>セル8</td>
+              <td class="ok">○</td><td>—</td>
+              <td>1,100ms</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 反応時間 -->
+      <div class="card">
+        <h3>反応時間の推移</h3>
+        <div style="margin-top:8px;">
+          <div class="bar-row">
+            <span class="bar-label">手順1</span>
+            <div class="bar-bg"><div class="bar-fill" style="width:65%"></div></div>
+            <span class="bar-val">1,200ms</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">手順2</span>
+            <div class="bar-bg"><div class="bar-fill" style="width:53%; background:#e53935"></div></div>
+            <span class="bar-val" style="color:#e53935;">980ms ×</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">手順3</span>
+            <div class="bar-bg"><div class="bar-fill" style="width:57%"></div></div>
+            <span class="bar-val">1,050ms</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">手順4</span>
+            <div class="bar-bg"><div class="bar-fill" style="width:48%"></div></div>
+            <span class="bar-val">890ms</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">手順5</span>
+            <div class="bar-bg"><div class="bar-fill" style="width:60%"></div></div>
+            <span class="bar-val">1,100ms</span>
+          </div>
+        </div>
+        <p style="font-size:12px; color:#888; margin-top:12px;">平均反応時間：1,044ms</p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    t.classList.toggle('active', ['patients','detail','session'][i] === name)
+  })
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+  document.getElementById('tab-' + name).classList.add('active')
+}
+</script>
+</body>
+</html>

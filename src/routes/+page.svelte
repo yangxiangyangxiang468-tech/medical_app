@@ -3,7 +3,6 @@ let screen: "game" | "settings" | "review" = "game"
 
 let settings = {
   speed: 500,
-  timeLimit: 0,
   replaySpeed: 300
 }
 
@@ -30,37 +29,23 @@ let result:null|"success"|"fail"=null
 let mistakes:number[] = []
 const maxMistakes = 2
 
-let timer:ReturnType<typeof setTimeout> | null = null
-let remainingTime:number = 0
-let interval:ReturnType<typeof setInterval> | null = null
+let elapsedTime:number = 0
+let stopwatchStart:number = 0
+let stopwatchInterval:ReturnType<typeof setInterval> | null = null
 
 const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms))
 $: cells = Array.from({length:gridSize*gridSize},(_,i)=>i)
 
-// ===== タイマー =====
-function startTimer(){
-  if(settings.timeLimit <= 0 || result) return
-
-  if(interval) clearInterval(interval)
-  if(timer) clearTimeout(timer)
-
-  interval = setInterval(()=>{
-    remainingTime -= 100
-    if(remainingTime <= 0){
-      remainingTime = 0
-      clearInterval(interval)
-    }
-  },100)
-
-  timer = setTimeout(()=>{
-    result = "fail"
-    clearInterval(interval)
-  }, remainingTime)
+function startStopwatch(){
+  stopwatchStart = Date.now()
+  if(stopwatchInterval) clearInterval(stopwatchInterval)
+  stopwatchInterval = setInterval(()=>{
+    elapsedTime = Date.now() - stopwatchStart
+  }, 100)
 }
 
-function stopTimer(){
-  if(interval) clearInterval(interval)
-  if(timer) clearTimeout(timer)
+function stopStopwatch(){
+  if(stopwatchInterval) clearInterval(stopwatchInterval)
 }
 
 // ===== スタート =====
@@ -71,6 +56,9 @@ async function start(){
   result=null
   fullUserInputs=[]
   activeIndex = null
+  elapsedTime = 0
+  stopStopwatch()
+
   let pool = Array.from({ length: gridSize*gridSize }, (_, i) => i)
   pool = pool.sort(() => Math.random() - 0.5)
 
@@ -83,9 +71,6 @@ async function start(){
 
   mistakes = Array(sequence.length).fill(0)
 
-  stopTimer()
-  remainingTime = settings.timeLimit > 0 ? settings.timeLimit : 0
-  stopTimer()
   isPlaying=true
   for(let i of sequence){
     activeIndex=i
@@ -95,7 +80,7 @@ async function start(){
   }
   isPlaying=false
 
-  startTimer()
+  startStopwatch()
 }
 
 // ===== クリック =====
@@ -112,7 +97,7 @@ async function clickCell(i:number){
 
     if(userSequence.length === sequence.length){
       result="success"
-      stopTimer()
+      stopStopwatch()
     }
 
   }else{
@@ -120,18 +105,13 @@ async function clickCell(i:number){
 
     if(mistakes[index] >= maxMistakes){
       result="fail"
-      stopTimer()
+      stopStopwatch()
       return
     }
 
     userSequence = userSequence.slice(0, index)
 
-    stopTimer()
     await replayFrom(index)
-
-    if(result === null){
-      startTimer()
-    }
   }
 }
 
@@ -150,7 +130,7 @@ async function replayFrom(startIndex:number){
 }
 
 // ===== 入力リプレイ =====
-  async function startReplay(){
+async function startReplay(){
   replayIndex = null
   replayStep = null
 
@@ -192,7 +172,6 @@ function getClass(row:number, col:number){
 
 <div class="left">
 
-
 <div>
 グリッド
 <div class="row">
@@ -216,19 +195,14 @@ function getClass(row:number, col:number){
 </button>
 
 <div class="menu-group">
-  <button 
-    class="menu-btn" 
+  <button
+    class="menu-btn"
     on:click={()=>screen="settings"}
     disabled={isPlaying}
   >
     設定
   </button>
 </div>
-
-
-{#if settings.timeLimit > 0}
-<div>残り時間: {Math.ceil(remainingTime/1000)} 秒</div>
-{/if}
 
 {#if result && !isPlaying && sequence.length > 0}
 
@@ -238,10 +212,11 @@ function getClass(row:number, col:number){
 </button>
 </div>
 
-
 <div class="result" class:success={result==="success"} class:fail={result==="fail"}>
  {result === "success" ? "成功！" : "失敗"}
 </div>
+
+<div class="elapsed">所要時間: {(elapsedTime/1000).toFixed(1)} 秒</div>
 
 {/if}
 
@@ -257,7 +232,8 @@ on:click={()=>clickCell(i)}>
 {/each}
 </div>
 </div>
-<!-- ===== 比較表（追加のみ） ===== -->
+
+<!-- ===== 比較表 ===== -->
 {#if result}
 <div class="matrix-panel">
 
@@ -296,14 +272,6 @@ on:click={()=>clickCell(i)}>
 表示スピード
 <input type="range" min="100" max="1000" step="100" bind:value={settings.speed} />
 <div>{settings.speed} ms</div>
-</div>
-
-<div>
-制限時間
-<input type="range" min="0" max="600000" step="20000" bind:value={settings.timeLimit} />
-<div>
- {settings.timeLimit === 0 ? "無制限" : Math.ceil(settings.timeLimit/1000) + " 秒"}
-</div>
 </div>
 
 <button on:click={()=>screen="game"}>戻る</button>
@@ -345,7 +313,6 @@ on:click={()=>clickCell(i)}>
 <!-- 右 -->
 <div class="review-right">
 
-
 <h3>結果（比較表）</h3>
 
 <div class="simple-table">
@@ -364,10 +331,6 @@ on:click={()=>clickCell(i)}>
 {/each}
 
 </div>
-
-
-
-
 
 </div>
 
@@ -388,6 +351,14 @@ on:click={()=>clickCell(i)}>
  border-radius:12px;
  color:white;
 }
+
+.elapsed{
+ margin-top:8px;
+ font-size:13px;
+ color:#555;
+ text-align:center;
+}
+
 .simple-table{
  display:grid;
  grid-template-columns:30px 50px 50px 50px;
@@ -495,8 +466,6 @@ on:click={()=>clickCell(i)}>
 
 .ok{ color:#4caf50; font-weight:bold; }
 
-
-/* 👇ここに追加 */
 .matrix-panel{
  width:260px;
  background:#eee;
@@ -530,47 +499,13 @@ on:click={()=>clickCell(i)}>
 }
 
 .ng2{
-  background:#f44336;
-  color:white;
+ background:#f44336;
+ color:white;
 }
-
-.menu-btn{
-  width:100%;
-  padding:14px;
-
-  background:#fff;
-  color:#000;
-  font-size:16px;
-  font-weight:bold;
-
-  border:2px solid #000;
-  border-radius:8px;
-  cursor:pointer;
-
-  transition:0.2s;
-}
-
-.menu-btn:hover{
-  background:#1976d2;
-  color:white;
-}
-
-.menu-btn:active{
-  transform:scale(0.97);
-}
-
-.menu-btn:hover{
- background:#1976d2;
-}
-
-.menu-btn:active{
- transform:scale(0.97);
-}
- 
 
 .menu-group{
  display:flex;
- flex-direction:column; 
+ flex-direction:column;
  gap:20px;
  margin-top:10px;
 }
@@ -578,33 +513,32 @@ on:click={()=>clickCell(i)}>
 .menu-btn{
  width:100%;
  padding:14px;
-
  background:#fff;
  color:#000;
  font-size:16px;
  font-weight:bold;
-
  border:2px solid #000;
  border-radius:8px;
  cursor:pointer;
-
  transition:0.2s;
 }
 
 .menu-btn:hover{
  background:#1976d2;
+ color:white;
 }
 
 .menu-btn:active{
  transform:scale(0.97);
 }
+
 .okReplay{
-  background:#4caf50;
-  color:white;
+ background:#4caf50;
+ color:white;
 }
 
 .ngReplay{
-  background:#f44336;
-  color:white;
+ background:#f44336;
+ color:white;
 }
 </style>
