@@ -1,10 +1,18 @@
 <script lang="ts">
+import { fieldDefs } from '$lib/schema'
+import { saveSession } from '$lib/storage'
+import type { SessionData } from '$lib/schema'
+
 let screen: "game" | "settings" | "review" = "game"
 
 let settings = {
   speed: 500,
   replaySpeed: 300
 }
+
+let subjectCode = ''
+let saveStatus: null | 'saving' | 'saved' | 'error' = null
+let enabledKeys = new Set(fieldDefs.filter(f => f.defaultEnabled).map(f => f.key))
 
 let gridSize = 3
 let flashCount = 5
@@ -19,6 +27,7 @@ let userSequence:number[]=[]
 let playLog:{ correct:number, inputs:number[] }[]=[]
 
 let fullUserInputs:number[] = []
+let fullUserTargets:number[] = []
 let replayIndex:number|null = null
 let replayStep:number|null = null
 
@@ -55,8 +64,10 @@ async function start(){
   playLog=[]
   result=null
   fullUserInputs=[]
+  fullUserTargets=[]
   activeIndex = null
   elapsedTime = 0
+  saveStatus = null
   stopStopwatch()
 
   let pool = Array.from({ length: gridSize*gridSize }, (_, i) => i)
@@ -87,9 +98,9 @@ async function start(){
 async function clickCell(i:number){
   if(isPlaying || result) return
 
-  fullUserInputs.push(i)
-
   const index = userSequence.length
+  fullUserInputs.push(i)
+  fullUserTargets.push(index)
   playLog[index].inputs.push(i)
 
   if(sequence[index] === i){
@@ -146,7 +157,8 @@ async function startReplay(){
 
 function isReplayCorrect(){
   if(replayStep === null) return null
-  return fullUserInputs[replayStep] === sequence[replayStep]
+  const target = fullUserTargets[replayStep]
+  return fullUserInputs[replayStep] === sequence[target]
 }
 
 function getMark(row:number, col:number){
@@ -164,6 +176,29 @@ function getClass(row:number, col:number){
   if(input === undefined) return ""
   return input === log.correct ? "ok2" : "ng2"
 }
+
+async function handleSave(){
+  if(!result) return
+  saveStatus = 'saving'
+  const session: SessionData = {
+    subjectCode,
+    gridSize,
+    flashCount,
+    speedMs: settings.speed,
+    result,
+    elapsedTimeMs: elapsedTime,
+    totalMistakes: mistakes.reduce((a, b) => a + b, 0),
+    sequence,
+    playLog
+  }
+  const enabled = fieldDefs.filter(f => enabledKeys.has(f.key))
+  try {
+    await saveSession(session, enabled)
+    saveStatus = 'saved'
+  } catch {
+    saveStatus = 'error'
+  }
+}
 </script>
 
 <!-- ===== GAME ===== -->
@@ -171,6 +206,11 @@ function getClass(row:number, col:number){
 <div class="app">
 
 <div class="left">
+
+<div>
+被験者コード
+<input class="code-input" type="text" bind:value={subjectCode} placeholder="例: P001" />
+</div>
 
 <div>
 グリッド
@@ -217,6 +257,15 @@ function getClass(row:number, col:number){
 </div>
 
 <div class="elapsed">所要時間: {(elapsedTime/1000).toFixed(1)} 秒</div>
+
+<button class="menu-btn save-btn"
+  on:click={handleSave}
+  disabled={saveStatus === 'saving' || saveStatus === 'saved'}>
+  {saveStatus === 'saving' ? '保存中...' : saveStatus === 'saved' ? '保存済み' : '保存'}
+</button>
+{#if saveStatus === 'error'}
+  <div class="save-error">保存に失敗しました</div>
+{/if}
 
 {/if}
 
@@ -272,6 +321,23 @@ on:click={()=>clickCell(i)}>
 表示スピード
 <input type="range" min="100" max="1000" step="100" bind:value={settings.speed} />
 <div>{settings.speed} ms</div>
+</div>
+
+<div class="field-settings">
+  <h3>保存項目</h3>
+  {#each fieldDefs as f}
+    <label class="field-row">
+      <input type="checkbox"
+        checked={enabledKeys.has(f.key)}
+        on:change={e => {
+          if (e.currentTarget.checked) enabledKeys.add(f.key)
+          else enabledKeys.delete(f.key)
+          enabledKeys = new Set(enabledKeys)
+        }}
+      />
+      {f.label}
+    </label>
+  {/each}
 </div>
 
 <button on:click={()=>screen="game"}>戻る</button>
@@ -338,8 +404,8 @@ on:click={()=>clickCell(i)}>
 {/if}
 
 <style>
-.app{ display:flex; height:100vh; background:#888; }
-.left{ width:200px; padding:10px; background:#ddd; }
+.app{ display:flex; min-height:100vh; background:#888; }
+.left{ width:200px; min-width:160px; padding:10px; background:#ddd; }
 .row{ display:flex; justify-content:space-between; margin:5px 0; }
 .start{ width:100%; margin-top:10px; }
 
@@ -357,6 +423,51 @@ on:click={()=>clickCell(i)}>
  font-size:13px;
  color:#555;
  text-align:center;
+}
+
+.code-input{
+ width:100%;
+ padding:6px;
+ font-size:14px;
+ box-sizing:border-box;
+ border:1px solid #aaa;
+ border-radius:4px;
+ margin-top:4px;
+}
+
+.save-btn{
+ margin-top:8px;
+}
+
+.save-btn:disabled{
+ background:#ccc;
+ color:#888;
+ border-color:#bbb;
+ cursor:default;
+}
+
+.save-error{
+ color:#f44336;
+ font-size:12px;
+ text-align:center;
+ margin-top:4px;
+}
+
+.field-settings{
+ display:flex;
+ flex-direction:column;
+ gap:8px;
+ background:#eee;
+ padding:12px;
+ border-radius:8px;
+ font-size:15px;
+}
+
+.field-row{
+ display:flex;
+ align-items:center;
+ gap:8px;
+ cursor:pointer;
 }
 
 .simple-table{
@@ -381,8 +492,13 @@ on:click={()=>clickCell(i)}>
 .success{ background:#4caf50; }
 .fail{ background:#f44336; }
 
-.center{ flex:1; display:flex; justify-content:center; align-items:center; }
-.grid{ display:grid; gap:10px; width:700px; height:700px; }
+.center{ flex:1; display:flex; justify-content:center; align-items:center; min-width:0; }
+.grid{
+  display:grid;
+  gap:clamp(4px, 1vmin, 10px);
+  width:min(calc(100vw - 480px), 700px);
+  height:min(calc(100vw - 480px), 700px);
+}
 .cell{ background:#666; aspect-ratio:1/1; border-radius:10px; }
 .cell.active{ background:yellow; }
 
@@ -391,7 +507,7 @@ on:click={()=>clickCell(i)}>
  flex-direction:column;
  align-items:center;
  justify-content:center;
- height:100vh;
+ min-height:100vh;
  gap:25px;
  background:#ddd;
  font-size:28px;
@@ -468,8 +584,25 @@ on:click={()=>clickCell(i)}>
 
 .matrix-panel{
  width:260px;
+ min-width:120px;
  background:#eee;
  padding:10px;
+}
+
+@media (max-width: 1000px){
+  .matrix-panel{ width:200px; }
+}
+
+@media (max-width: 820px){
+  .app{ flex-wrap:wrap; height:auto; }
+  .left{ width:100%; display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap:8px; }
+  .left > div, .left > button { flex-shrink:0; }
+  .center{ width:100%; padding:16px 0; }
+  .grid{
+    width:min(80vmin, 700px);
+    height:min(80vmin, 700px);
+  }
+  .matrix-panel{ width:100%; }
 }
 
 .matrix{
@@ -541,12 +674,12 @@ on:click={()=>clickCell(i)}>
  transform:scale(0.97);
 }
 
-.okReplay{
+.review-cell.okReplay{
  background:#4caf50;
  color:white;
 }
 
-.ngReplay{
+.review-cell.ngReplay{
  background:#f44336;
  color:white;
 }
