@@ -370,7 +370,7 @@ on:click={()=>clickCell(i)}>
   class:replay={replayIndex === i}
   class:okReplay={replayIndex === i && isReplayCorrect()}
   class:ngReplay={replayIndex === i && isReplayCorrect() === false}>
-      {i}
+      {i+1}
     </div>
   {/each}
 </div>
@@ -391,9 +391,9 @@ on:click={()=>clickCell(i)}>
 
 {#each playLog as log, row (row)}
   <div>{row+1}</div>
-  <div>{log.correct}</div>
-  <div>{log.inputs[0] ?? ""}</div>
-  <div>{log.inputs[1] ?? ""}</div>
+  <div>{log.correct+1}</div>
+  <div>{log.inputs[0] !== undefined ? log.inputs[0]+1 : ""}</div>
+  <div>{log.inputs[1] !== undefined ? log.inputs[1]+1 : ""}</div>
 {/each}
 
 </div>
