@@ -120,9 +120,9 @@ async function clickCell(i:number){
       return
     }
 
-    userSequence = userSequence.slice(0, index)
+    userSequence = []
 
-    await replayFrom(index)
+    await replayFrom(0)
   }
 }
 
