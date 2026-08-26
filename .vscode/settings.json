@@ -1,5 +1,12 @@
 {
-	"files.associations": {
-		"*.css": "tailwindcss"
-	}
+    "files.associations": {
+        "*.css": "tailwindcss"
+    },
+    "remote.autoForwardPorts": false,
+    "remote.otherPortsAttributes": {
+        "onAutoForward": "ignore"
+    },
+    "remote.forwardOnOpen": false,
+
+    "workbench.editor.enablePreview": false
 }
