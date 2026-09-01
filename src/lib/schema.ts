@@ -29,6 +29,8 @@ export const fieldDefs: FieldDef[] = [
   { key: 'sequence',        label: '正解配列',         defaultEnabled: false, getValue: s => s.sequence },
   { key: 'play_log',        label: '詳細ログ',         defaultEnabled: true,  getValue: s =>
     s.playLog.map((attempt, i) => {
+      const allCorrect = attempt.correct.every((c, r) => attempt.inputs[r] === c)
+      if (allCorrect) return `${i+1}回目〇`
       const rows = attempt.correct.map((c, r) => {
         const inp = attempt.inputs[r]
         if (inp === undefined) return `  第${r+1}問: 正解=マス${c+1} → 未回答`
