@@ -32,7 +32,8 @@ export const fieldDefs: FieldDef[] = [
       const rows = attempt.correct.map((c, r) => {
         const inp = attempt.inputs[r]
         if (inp === undefined) return `  第${r+1}問: 正解=マス${c+1} → 未回答`
-        return `  第${r+1}問: 正解=マス${c+1} → マス${inp+1}${inp === c ? '○' : '×'}`
+        if (inp === c) return `  第${r+1}問〇`
+        return `  第${r+1}問: 正解=マス${c+1} → マス${inp+1}×`
       }).join('\n')
       return `${i+1}回目\n${rows}`
     }).join('\n')
