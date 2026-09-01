@@ -31,10 +31,10 @@ export const fieldDefs: FieldDef[] = [
     s.playLog.map((attempt, i) => {
       const rows = attempt.correct.map((c, r) => {
         const inp = attempt.inputs[r]
-        if (inp === undefined) return `第${r+1}問: 正解=マス${c+1} → 未回答`
-        return `第${r+1}問: 正解=マス${c+1} → マス${inp+1}${inp === c ? '○' : '×'}`
-      }).join(' / ')
-      return `${i+1}回目: ${rows}`
+        if (inp === undefined) return `  第${r+1}問: 正解=マス${c+1} → 未回答`
+        return `  第${r+1}問: 正解=マス${c+1} → マス${inp+1}${inp === c ? '○' : '×'}`
+      }).join('\n')
+      return `${i+1}回目\n${rows}`
     }).join('\n')
   },
 ]
