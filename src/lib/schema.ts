@@ -17,6 +17,9 @@ export type FieldDef = {
   getValue: (s: SessionData) => unknown
 }
 
+// 同じ光の数(レベル)での再挑戦を丸数字で表す。1回目は無印
+const tryMark = (t: number) => ['', '', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨'][t] ?? `(${t})`
+
 // ここに項目を追加・削除する。labelがCSVのヘッダー行になる
 export const fieldDefs: FieldDef[] = [
   { key: 'subject_code',    label: '被験者コード',    defaultEnabled: true,  getValue: s => s.subjectCode },
@@ -28,17 +31,17 @@ export const fieldDefs: FieldDef[] = [
   { key: 'total_mistakes',  label: '総ミス数',         defaultEnabled: true,  getValue: s => s.totalMistakes },
   { key: 'sequence',        label: '正解配列',         defaultEnabled: false, getValue: s => s.sequence },
   { key: 'play_log',        label: '詳細ログ',         defaultEnabled: true,  getValue: s =>
-    s.playLog.map((attempt) => {
-      const mark = ['', '', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨'][attempt.try] ?? `(${attempt.try})`
-      const head = `${attempt.level}問目${mark}`
-      const allCorrect = attempt.correct.every((c, r) => attempt.inputs[r] === c)
-      if (allCorrect) return `${head}〇`
-      const rows = attempt.inputs
-        .map((inp, r) => ({ inp, r, c: attempt.correct[r] }))
-        .filter(x => x.inp !== x.c)
-        .map(x => `  第${x.r+1}問× ${x.c+1}〇→${x.inp+1}×`)
-        .join('\n')
-      return `${head}\n${rows}`
+    s.playLog.map((a) => {
+      const cleared = a.correct.every((c, r) => a.inputs[r] === c)
+      return `${a.level}問目${tryMark(a.try)}${cleared ? '〇' : '×'}`
     }).join('\n')
+  },
+  { key: 'mistake_log',     label: 'ミス詳細',         defaultEnabled: true,  getValue: s =>
+    s.playLog.flatMap((a) =>
+      a.inputs
+        .map((inp, r) => ({ inp, r, c: a.correct[r] }))
+        .filter(x => x.inp !== x.c)
+        .map(x => `${a.level}問目${tryMark(a.try)} 第${x.r+1}問 ${x.c+1}〇→${x.inp+1}×`)
+    ).join('\n')
   },
 ]
