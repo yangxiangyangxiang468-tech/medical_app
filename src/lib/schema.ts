@@ -31,10 +31,9 @@ export const fieldDefs: FieldDef[] = [
     s.playLog.map((attempt, i) => {
       const allCorrect = attempt.correct.every((c, r) => attempt.inputs[r] === c)
       if (allCorrect) return `${i+1}回目〇`
-      const rows = attempt.correct.map((c, r) => {
-        const inp = attempt.inputs[r]
+      const rows = attempt.inputs.map((inp, r) => {
+        const c = attempt.correct[r]
         if (inp === c) return `  第${r+1}問〇`
-        if (inp === undefined) return `  第${r+1}問× ${c+1}〇→未回答`
         return `  第${r+1}問× ${c+1}〇→${inp+1}×`
       }).join('\n')
       return `${i+1}回目\n${rows}`
