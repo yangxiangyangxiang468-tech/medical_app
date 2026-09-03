@@ -29,7 +29,8 @@ export const fieldDefs: FieldDef[] = [
   { key: 'sequence',        label: '正解配列',         defaultEnabled: false, getValue: s => s.sequence },
   { key: 'play_log',        label: '詳細ログ',         defaultEnabled: true,  getValue: s =>
     s.playLog.map((attempt) => {
-      const head = `${attempt.level}問目${attempt.try > 1 ? `(${attempt.try}回目)` : ''}`
+      const mark = ['', '', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨'][attempt.try] ?? `(${attempt.try})`
+      const head = `${attempt.level}問目${mark}`
       const allCorrect = attempt.correct.every((c, r) => attempt.inputs[r] === c)
       if (allCorrect) return `${head}〇`
       const rows = attempt.inputs.map((inp, r) => {
