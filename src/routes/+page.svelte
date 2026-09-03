@@ -223,7 +223,7 @@ async function handleSave(){
     elapsedTimeMs: elapsedTime,
     totalMistakes: totalMistakeCount,
     sequence,
-    playLog: gameHistory.flatMap(r => r.attempts)
+    playLog: gameHistory.flatMap(r => r.attempts.map(a => ({ ...a, level: r.level })))
   }
   const enabled = fieldDefs.filter(f => enabledKeys.has(f.key))
   try {
