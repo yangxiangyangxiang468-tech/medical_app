@@ -7,7 +7,7 @@ export type SessionData = {
   elapsedTimeMs: number
   totalMistakes: number
   sequence: number[]
-  playLog: { correct: number[]; inputs: number[]; level: number }[]
+  playLog: { correct: number[]; inputs: number[]; level: number; try: number }[]
 }
 
 export type FieldDef = {
@@ -29,14 +29,15 @@ export const fieldDefs: FieldDef[] = [
   { key: 'sequence',        label: '正解配列',         defaultEnabled: false, getValue: s => s.sequence },
   { key: 'play_log',        label: '詳細ログ',         defaultEnabled: true,  getValue: s =>
     s.playLog.map((attempt) => {
+      const head = `${attempt.level}問目${attempt.try > 1 ? ` ${attempt.try}回目` : ''}`
       const allCorrect = attempt.correct.every((c, r) => attempt.inputs[r] === c)
-      if (allCorrect) return `${attempt.level}問目〇`
+      if (allCorrect) return `${head}〇`
       const rows = attempt.inputs.map((inp, r) => {
         const c = attempt.correct[r]
         if (inp === c) return `  第${r+1}問〇`
         return `  第${r+1}問× ${c+1}〇→${inp+1}×`
       }).join('\n')
-      return `${attempt.level}問目\n${rows}`
+      return `${head}\n${rows}`
     }).join('\n')
   },
 ]
