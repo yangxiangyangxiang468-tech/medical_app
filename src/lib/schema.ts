@@ -36,7 +36,7 @@ export const fieldDefs: FieldDef[] = [
       const rows = attempt.inputs
         .map((inp, r) => ({ inp, r, c: attempt.correct[r] }))
         .filter(x => x.inp !== x.c)
-        .map(x => `第${x.r+1}問× ${x.c+1}〇→${x.inp+1}×`)
+        .map(x => `  第${x.r+1}問× ${x.c+1}〇→${x.inp+1}×`)
         .join('\n')
       return `${head}\n${rows}`
     }).join('\n')
