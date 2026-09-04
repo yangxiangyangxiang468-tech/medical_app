@@ -654,6 +654,18 @@ aria-label={`セル ${i+1}`}>
   .center{ width:100%; flex:1; min-height:0; padding:8px 0; }
   .grid{ width:min(62cqw, 62cqh); height:min(62cqw, 62cqh); }
   .round-status-panel{ width:100%; max-height:20vh; flex-shrink:0; }
+
+  /* タブレットではスクロールバーを一切表示しない（タッチでスクロールは可能） */
+  :global(html), :global(body),
+  .settings, .review, .review-left, .review-right{
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+  :global(html)::-webkit-scrollbar, :global(body)::-webkit-scrollbar,
+  .settings::-webkit-scrollbar, .review::-webkit-scrollbar,
+  .review-left::-webkit-scrollbar, .review-right::-webkit-scrollbar{
+    display:none;
+  }
 }
 
 .menu-group{
