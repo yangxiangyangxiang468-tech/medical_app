@@ -415,7 +415,8 @@ aria-label={`セル ${i+1}`}>
 
 <style>
 .app{ display:flex; height:100vh; overflow:hidden; background:#888; }
-.left{ width:200px; min-width:160px; padding:10px; background:#ddd; overflow-y:auto; }
+.left{ width:200px; min-width:160px; padding:10px; background:#ddd; overflow-y:auto; scrollbar-width:none; }
+.left::-webkit-scrollbar{ display:none; }
 .row{ display:flex; justify-content:space-between; margin:5px 0; }
 .start{ width:100%; margin-top:10px; }
 
@@ -606,7 +607,13 @@ aria-label={`セル ${i+1}`}>
  padding:10px;
  overflow-y:auto;
  box-sizing:border-box;
+ display:flex;
+ flex-direction:column;
+ scrollbar-width:none;
 }
+.round-status-panel::-webkit-scrollbar{ display:none; }
+.round-status-panel > h3{ margin:0 0 8px; flex-shrink:0; }
+.round-status-panel > .round-status-list{ margin-top:auto; }
 
 .round-status-list{
  display:flex;
