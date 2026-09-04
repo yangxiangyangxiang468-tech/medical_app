@@ -645,6 +645,7 @@ aria-label={`セル ${i+1}`}>
   .left{ width:100%; display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap:8px; max-height:35vh; overflow-y:auto; flex-shrink:0; }
   .left > div, .left > button { flex-shrink:0; }
   .center{ width:100%; flex:1; min-height:0; padding:8px 0; }
+  .grid{ width:min(72cqw, 72cqh); height:min(72cqw, 72cqh); }
   .round-status-panel{ width:100%; max-height:20vh; flex-shrink:0; }
 }
 
