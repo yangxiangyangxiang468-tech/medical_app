@@ -41,7 +41,7 @@ export const fieldDefs: FieldDef[] = [
       a.inputs
         .map((inp, r) => ({ inp, r, c: a.correct[r] }))
         .filter(x => x.inp !== x.c)
-        .map(x => `${a.level}問目${tryMark(a.try)} 第${x.r+1}問 ${x.c+1}〇→${x.inp+1}×`)
+        .map(x => `${a.level}問目${tryMark(a.try)} 第${x.r+1}問 ${x.c+1}(正)→${x.inp+1}(誤)`)
     ).join('\n')
   },
 ]
