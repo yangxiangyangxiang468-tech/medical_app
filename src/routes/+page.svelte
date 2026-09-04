@@ -479,8 +479,8 @@ aria-label={`セル ${i+1}`}>
 .grid{
   display:grid;
   gap:clamp(4px, 1vmin, 10px);
-  width:min(100cqw, 100cqh);
-  height:min(100cqw, 100cqh);
+  width:min(88cqw, 88cqh);
+  height:min(88cqw, 88cqh);
 }
 .cell{ background:#666; aspect-ratio:1/1; border-radius:10px; display:flex; align-items:center; justify-content:center; }
 .cell.active{ background:yellow; }
@@ -645,7 +645,7 @@ aria-label={`セル ${i+1}`}>
   .left{ width:100%; display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap:8px; max-height:35vh; overflow-y:auto; flex-shrink:0; }
   .left > div, .left > button { flex-shrink:0; }
   .center{ width:100%; flex:1; min-height:0; padding:8px 0; }
-  .grid{ width:min(72cqw, 72cqh); height:min(72cqw, 72cqh); }
+  .grid{ width:min(62cqw, 62cqh); height:min(62cqw, 62cqh); }
   .round-status-panel{ width:100%; max-height:20vh; flex-shrink:0; }
 }
 
