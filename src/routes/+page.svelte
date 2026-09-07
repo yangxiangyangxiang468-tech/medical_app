@@ -613,7 +613,6 @@ aria-label={`セル ${i+1}`}>
 }
 .round-status-panel::-webkit-scrollbar{ display:none; }
 .round-status-panel > h3{ margin:0 0 8px; flex-shrink:0; }
-.round-status-panel > .round-status-list{ margin-top:auto; }
 
 .round-status-list{
  display:flex;
