@@ -1,1 +1,12 @@
 @import 'tailwindcss';
+
+/* タブレット幅ではスクロールバーを一切表示しない（タッチでのスクロールは可能） */
+@media (max-width: 820px) {
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
+}
