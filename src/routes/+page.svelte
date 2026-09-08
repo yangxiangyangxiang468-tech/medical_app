@@ -41,6 +41,8 @@ let activeIndex: number | null = null
 let isPlaying = false
 let countdownText: string | null = null
 let result: null | "success" | "fail" = null
+// 次の問題(または再挑戦)へ進むボタン待ち。'' の間は自動で進まない
+let awaitingContinue: '' | 'next' | 'retry' = ''
 
 let feedbackIndex: number | null = null
 let feedbackCorrect: boolean | null = null
@@ -113,8 +115,16 @@ async function playRound(isRetry: boolean){
   isPlaying = false
 }
 
+async function continueGame(){
+  if (isPlaying || !awaitingContinue) return
+  const isRetry = awaitingContinue === 'retry'
+  awaitingContinue = ''
+  await playRound(isRetry)
+}
+
 async function start(){
   if (isPlaying || gameActive) return
+  awaitingContinue = ''
   result = null
   roundHistory = []
   gameHistory = []
@@ -133,7 +143,7 @@ function cloneAttempts(list: Attempt[]): Attempt[] {
 }
 
 async function clickCell(i: number){
-  if (isPlaying || result) return
+  if (isPlaying || result || awaitingContinue) return
 
   const idx = userSequence.length
   const correct = sequence[idx] === i
@@ -161,7 +171,8 @@ async function clickCell(i: number){
         isPlaying = false
       } else {
         flashCount++
-        await playRound(false)
+        awaitingContinue = 'next'
+        isPlaying = false
       }
     } else {
       isPlaying = false
@@ -178,7 +189,8 @@ async function clickCell(i: number){
       isPlaying = false
     } else {
       currentRun++
-      await playRound(true)
+      awaitingContinue = 'retry'
+      isPlaying = false
     }
   }
 }
@@ -320,6 +332,13 @@ aria-label={`セル ${i+1}`}>
 </div>
 {#if countdownText}
 <div class="countdown-overlay">{countdownText}</div>
+{/if}
+{#if awaitingContinue}
+<div class="countdown-overlay">
+<button class="continue-btn" on:click={continueGame}>
+{awaitingContinue === 'retry' ? 'もう一度チャレンジ' : '次の問題へ'}
+</button>
+</div>
 {/if}
 </div>
 
@@ -510,6 +529,18 @@ aria-label={`セル ${i+1}`}>
  padding:20px;
  box-sizing:border-box;
 }
+
+.continue-btn{
+ font-size:24px;
+ font-weight:bold;
+ padding:16px 40px;
+ border:none;
+ border-radius:12px;
+ background:#1565c0;
+ color:#fff;
+ cursor:pointer;
+}
+.continue-btn:hover{ background:#0d47a1; }
 
 .settings{
  display:flex;
