@@ -114,6 +114,7 @@ async function playRound(isRetry: boolean){
 }
 
 async function start(){
+  if (isPlaying || gameActive) return
   result = null
   roundHistory = []
   gameHistory = []
@@ -260,7 +261,7 @@ async function handleSave(){
 <div class="current-progress">入力: {userSequence.length}/{sequence.length}</div>
 {/if}
 
-<button class="start menu-btn" on:click={start} disabled={isPlaying}>
+<button class="start menu-btn" on:click={start} disabled={isPlaying || gameActive}>
   スタート
 </button>
 
