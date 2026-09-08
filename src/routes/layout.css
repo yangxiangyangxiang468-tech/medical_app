@@ -17,3 +17,11 @@ body::-webkit-scrollbar,
   width: 0;
   height: 0;
 }
+
+/* ページ自体はスクロールさせない（各画面が内部で高さを管理する）。
+   ビューポート単位の誤差やツールバー分でわずかにスクロールできてしまうのを防ぐ。 */
+html,
+body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
