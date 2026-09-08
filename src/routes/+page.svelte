@@ -434,7 +434,7 @@ aria-label={`セル ${i+1}`}>
 {/if}
 
 <style>
-.app{ display:flex; height:100vh; overflow:hidden; background:#888; }
+.app{ display:flex; height:100vh; height:100dvh; overflow:hidden; background:#888; }
 .left{ width:200px; min-width:160px; padding:10px; background:#ddd; overflow-y:auto; scrollbar-width:none; }
 .left::-webkit-scrollbar{ display:none; }
 .row{ display:flex; justify-content:space-between; margin:5px 0; }
@@ -548,6 +548,7 @@ aria-label={`セル ${i+1}`}>
  align-items:center;
  justify-content:center;
  min-height:100vh;
+ min-height:100dvh;
  gap:25px;
  background:#ddd;
  font-size:28px;
@@ -557,6 +558,7 @@ aria-label={`セル ${i+1}`}>
 .review{
  display:flex;
  min-height:100vh;
+ min-height:100dvh;
  background:#888;
 }
 
@@ -679,7 +681,7 @@ aria-label={`セル ${i+1}`}>
 }
 
 @media (max-width: 820px){
-  .app{ flex-direction:column; height:100vh; overflow:hidden; }
+  .app{ flex-direction:column; height:100vh; height:100dvh; overflow:hidden; }
   .left{ width:100%; display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap:8px; max-height:35vh; overflow-y:auto; flex-shrink:0; }
   .left > div, .left > button { flex-shrink:0; }
   .center{ width:100%; flex:1; min-height:0; padding:8px 0; }

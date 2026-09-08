@@ -1,12 +1,19 @@
 @import 'tailwindcss';
 
-/* タブレット幅ではスクロールバーを一切表示しない（タッチでのスクロールは可能） */
-@media (max-width: 1200px) {
-  * {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  *::-webkit-scrollbar {
-    display: none;
-  }
+/* スクロールバーは全画面で非表示（タッチ/ホイールでのスクロールは可能）。
+   このアプリは全画面固定表示のため、どの画面でもスクロールバーは出さない。 */
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
