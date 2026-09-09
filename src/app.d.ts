@@ -5,9 +5,21 @@ interface R2ObjectLike {
 	text(): Promise<string>;
 }
 
+interface R2ListItemLike {
+	key: string;
+	size: number;
+}
+
+interface R2ListResultLike {
+	objects: R2ListItemLike[];
+	truncated: boolean;
+	cursor?: string;
+}
+
 interface R2BucketLike {
 	get(key: string): Promise<R2ObjectLike | null>;
 	put(key: string, value: string): Promise<unknown>;
+	list(options?: { prefix?: string; cursor?: string }): Promise<R2ListResultLike>;
 }
 
 declare global {
