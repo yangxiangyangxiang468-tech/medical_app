@@ -359,10 +359,12 @@ function endSession(){
 {/if}
 
 {#if isPractice}
+<button class="menu-btn next-btn again-btn" on:click={() => start(true)}>もう一回</button>
 <button class="menu-btn next-btn" on:click={endSession}>練習を終える</button>
 {:else}
 <div class="finish-note">この被験者の測定は終了しました。続けますか？</div>
 {#if saveStatus === 'saved'}
+<button class="menu-btn next-btn again-btn" on:click={() => start(false)}>もう一回（同じ被験者）</button>
 <button class="menu-btn next-btn" on:click={endSession}>次の被験者へ進む</button>
 {:else if saveStatus === 'error'}
 <button class="menu-btn next-btn danger" on:click={endSession}>保存できていませんが次へ進む</button>
@@ -580,6 +582,9 @@ button.next-btn{
 }
 button.next-btn.danger{
  background:#b71c1c;
+}
+button.next-btn.again-btn{
+ background:#2e7d32;
 }
 button.next-btn:disabled{
  background:#ccc;
