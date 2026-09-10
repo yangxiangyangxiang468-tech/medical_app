@@ -12,6 +12,8 @@ let settings = {
 
 let subjectCode = ''
 let saveStatus: null | 'saving' | 'saved' | 'error' = null
+// 練習モード（このプレイは保存しない）。start() 実行時に確定する
+let isPractice = false
 let enabledKeys = new Set(fieldDefs.filter(f => f.defaultEnabled).map(f => f.key))
 
 const MIN_GRID = 3
@@ -65,6 +67,8 @@ $: cells = Array.from({ length: gridSize * gridSize }, (_, i) => i)
 $: maxFlash = gridSize * gridSize
 $: gameActive = sequence.length > 0 && result === null
 $: currentTry = roundMistakeCount + 1
+// 本番スタートは被験者コードが入っているときだけ許可（練習はコード不要）
+$: codeReady = subjectCode.trim().length > 0
 
 function startStopwatch(){
   stopwatchStart = Date.now()
@@ -122,8 +126,10 @@ async function continueGame(){
   await playRound(isRetry)
 }
 
-async function start(){
+async function start(practice: boolean){
   if (isPlaying || gameActive) return
+  if (!practice && !subjectCode.trim()) return
+  isPractice = practice
   awaitingContinue = ''
   result = null
   roundHistory = []
@@ -169,6 +175,7 @@ async function clickCell(i: number){
         result = "success"
         stopStopwatch()
         isPlaying = false
+        void saveNow()
       } else {
         flashCount++
         awaitingContinue = 'next'
@@ -187,6 +194,7 @@ async function clickCell(i: number){
       result = "fail"
       stopStopwatch()
       isPlaying = false
+      void saveNow()
     } else {
       currentRun++
       awaitingContinue = 'retry'
@@ -224,27 +232,37 @@ async function startReplay(){
   replayTry = null
 }
 
-async function handleSave(){
-  if (!result) return
-  saveStatus = 'saving'
-  const session: SessionData = {
+function buildSession(): SessionData {
+  return {
     subjectCode,
     gridSize,
     flashCount,
     speedMs: settings.speed,
-    result,
+    result: result as 'success' | 'fail',
     elapsedTimeMs: elapsedTime,
     totalMistakes: totalMistakeCount,
     sequence,
     playLog: gameHistory.flatMap(r => r.attempts.map((a, t) => ({ ...a, level: r.level, try: t + 1 })))
   }
+}
+
+// ゲーム終了時に自動で呼ばれる。失敗しても最大3回まで自動リトライし、
+// それでもダメなら saveStatus='error' にして「再保存」ボタンを出す。
+async function saveNow(){
+  if (isPractice || !result) return
+  saveStatus = 'saving'
+  const session = buildSession()
   const enabled = fieldDefs.filter(f => enabledKeys.has(f.key))
-  try {
-    await saveSession(session, enabled)
-    saveStatus = 'saved'
-  } catch {
-    saveStatus = 'error'
+  for (let n = 1; n <= 3; n++) {
+    try {
+      await saveSession(session, enabled)
+      saveStatus = 'saved'
+      return
+    } catch {
+      if (n < 3) await sleep(1500)
+    }
   }
+  saveStatus = 'error'
 }
 </script>
 
@@ -268,14 +286,26 @@ async function handleSave(){
 </div>
 </div>
 
+{#if gameActive && isPractice}
+<div class="current-progress practice-badge">練習中<br>記録されません</div>
+{/if}
+
 {#if gameActive}
 <div class="current-progress">{flashCount}問目 {currentTry}回目</div>
 <div class="current-progress">入力: {userSequence.length}/{sequence.length}</div>
 {/if}
 
-<button class="start menu-btn" on:click={start} disabled={isPlaying || gameActive}>
-  スタート
+{#if !gameActive}
+<button class="start menu-btn" on:click={() => start(false)} disabled={isPlaying || !codeReady}>
+  本番スタート
 </button>
+<button class="start menu-btn practice-btn" on:click={() => start(true)} disabled={isPlaying}>
+  練習スタート
+</button>
+{#if !codeReady}
+<div class="start-hint">被験者コードを入力すると本番を開始できます</div>
+{/if}
+{/if}
 
 <div class="menu-group">
   <button
@@ -302,13 +332,15 @@ async function handleSave(){
 <div class="elapsed">所要時間: {(elapsedTime/1000).toFixed(1)} 秒</div>
 <div class="elapsed">到達: {flashCount}問</div>
 
-<button class="menu-btn save-btn"
-  on:click={handleSave}
-  disabled={saveStatus === 'saving' || saveStatus === 'saved'}>
-  {saveStatus === 'saving' ? '保存中...' : saveStatus === 'saved' ? '保存済み' : '保存'}
-</button>
-{#if saveStatus === 'error'}
-  <div class="save-error">保存に失敗しました</div>
+{#if isPractice}
+<div class="save-state practice">練習のため保存していません</div>
+{:else if saveStatus === 'saving'}
+<div class="save-state">保存中...</div>
+{:else if saveStatus === 'saved'}
+<div class="save-state ok">保存しました ✓</div>
+{:else if saveStatus === 'error'}
+<div class="save-state ng">保存に失敗しました</div>
+<button class="menu-btn save-btn" on:click={saveNow}>再保存</button>
 {/if}
 
 {/if}
@@ -475,6 +507,35 @@ aria-label={`セル ${i+1}`}>
  font-weight:bold;
 }
 
+.current-progress.practice-badge{
+ background:#616161;
+ color:#fff;
+}
+
+.practice-btn{
+ background:#777;
+}
+
+.start-hint{
+ margin-top:6px;
+ font-size:12px;
+ color:#c62828;
+ text-align:center;
+}
+
+.save-state{
+ margin-top:10px;
+ padding:8px;
+ border-radius:6px;
+ text-align:center;
+ font-weight:bold;
+ font-size:14px;
+ background:#fff;
+}
+.save-state.ok{ background:#4caf50; color:#fff; }
+.save-state.ng{ background:#f44336; color:#fff; }
+.save-state.practice{ background:#e0e0e0; color:#555; }
+
 .save-btn{
  margin-top:8px;
 }
@@ -484,13 +545,6 @@ aria-label={`セル ${i+1}`}>
  color:#888;
  border-color:#bbb;
  cursor:default;
-}
-
-.save-error{
- color:#f44336;
- font-size:12px;
- text-align:center;
- margin-top:4px;
 }
 
 .success{ background:#4caf50; }
