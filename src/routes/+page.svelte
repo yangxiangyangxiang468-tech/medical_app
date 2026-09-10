@@ -264,6 +264,21 @@ async function saveNow(){
   }
   saveStatus = 'error'
 }
+
+// 1プレイを終えて待機状態へ戻す。本番だった場合は次の被験者のために
+// 被験者コードもクリアする（入れ忘れ・前の人のまま保存を防ぐ）。
+function endSession(){
+  const wasReal = !isPractice
+  sequence = []
+  userSequence = []
+  roundHistory = []
+  gameHistory = []
+  awaitingContinue = ''
+  result = null
+  saveStatus = null
+  isPractice = false
+  if (wasReal) subjectCode = ''
+}
 </script>
 
 <!-- ===== GAME ===== -->
@@ -295,7 +310,7 @@ async function saveNow(){
 <div class="current-progress">入力: {userSequence.length}/{sequence.length}</div>
 {/if}
 
-{#if !gameActive}
+{#if !gameActive && !result}
 <button class="start menu-btn" on:click={() => start(false)} disabled={isPlaying || !codeReady}>
   本番スタート
 </button>
@@ -341,6 +356,19 @@ async function saveNow(){
 {:else if saveStatus === 'error'}
 <div class="save-state ng">保存に失敗しました</div>
 <button class="menu-btn save-btn" on:click={saveNow}>再保存</button>
+{/if}
+
+{#if isPractice}
+<button class="menu-btn next-btn" on:click={endSession}>練習を終える</button>
+{:else}
+<div class="finish-note">この被験者の測定は終了しました。続けますか？</div>
+{#if saveStatus === 'saved'}
+<button class="menu-btn next-btn" on:click={endSession}>次の被験者へ進む</button>
+{:else if saveStatus === 'error'}
+<button class="menu-btn next-btn danger" on:click={endSession}>保存できていませんが次へ進む</button>
+{:else}
+<button class="menu-btn next-btn" disabled>保存の完了を待っています…</button>
+{/if}
 {/if}
 
 {/if}
@@ -512,8 +540,10 @@ aria-label={`セル ${i+1}`}>
  color:#fff;
 }
 
-.practice-btn{
+/* .menu-btn は後方で定義されるため button.* で詳細度を上げて上書きする */
+button.practice-btn{
  background:#777;
+ color:#fff;
 }
 
 .start-hint{
@@ -535,6 +565,27 @@ aria-label={`セル ${i+1}`}>
 .save-state.ok{ background:#4caf50; color:#fff; }
 .save-state.ng{ background:#f44336; color:#fff; }
 .save-state.practice{ background:#e0e0e0; color:#555; }
+
+.finish-note{
+ margin-top:12px;
+ font-size:13px;
+ color:#333;
+ text-align:center;
+}
+
+button.next-btn{
+ margin-top:8px;
+ background:#1565c0;
+ color:#fff;
+}
+button.next-btn.danger{
+ background:#b71c1c;
+}
+button.next-btn:disabled{
+ background:#ccc;
+ color:#888;
+ cursor:default;
+}
 
 .save-btn{
  margin-top:8px;
