@@ -799,7 +799,7 @@ button.next-btn:disabled{
   .app{ flex-direction:column; height:100vh; height:100svh; overflow:hidden; }
   .left{ width:100%; display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap:8px; max-height:35vh; overflow-y:auto; flex-shrink:0; }
   .left > div, .left > button { flex-shrink:0; }
-  .center{ width:100%; flex:1; min-height:0; padding:4px 0 0; align-items:flex-start; }
+  .center{ width:100%; flex:1; min-height:0; padding:4px 0; }
   .grid{ width:min(60cqw, 60cqh); height:min(60cqw, 60cqh); }
   .round-status-panel{ width:100%; max-height:20vh; flex-shrink:0; }
 }
