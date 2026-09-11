@@ -404,7 +404,9 @@ aria-label={`セル ${i+1}`}>
 {/if}
 </div>
 
-{#if gameActive || result}
+<!-- 進行状況パネルは常に描画して幅を確保する。ゲーム開始前/終了後だけ
+     消してしまうと右側の幅が無くなり、グリッドが .left の分だけ
+     右に偏って見えるため（中央寄せがページ中央からズレる）。 -->
 <div class="round-status-panel">
 <h3>進行状況</h3>
 <div class="round-status-list">
@@ -416,7 +418,6 @@ aria-label={`セル ${i+1}`}>
 {/each}
 </div>
 </div>
-{/if}
 
 </div>
 {/if}
