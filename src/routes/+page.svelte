@@ -378,7 +378,7 @@ function endSession(){
 </div>
 
 <div class="center">
-<div class="grid" style="grid-template-columns:repeat({gridSize},1fr)">
+<div class="grid" style="grid-template-columns:repeat({gridSize},1fr); grid-template-rows:repeat({gridSize},1fr)">
 {#each cells as i (i)}
 <button class="cell"
 class:active={activeIndex===i}
@@ -728,6 +728,7 @@ button.next-btn:disabled{
 .review-grid{
  display:grid;
  grid-template-columns:repeat(var(--grid), 1fr);
+ grid-template-rows:repeat(var(--grid), 1fr);
  gap:10px;
  width:min(80vmin, 500px);
  height:min(80vmin, 500px);
