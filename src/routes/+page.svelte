@@ -498,7 +498,7 @@ aria-label={`セル ${i+1}`}>
 
 <style>
 .app{ display:flex; height:100vh; height:100svh; overflow:hidden; background:#888; }
-.left{ width:200px; min-width:160px; padding:10px; background:#ddd; overflow-y:auto; scrollbar-width:none; }
+.left{ width:200px; min-width:160px; padding:10px; box-sizing:border-box; background:#ddd; overflow-y:auto; scrollbar-width:none; }
 .left::-webkit-scrollbar{ display:none; }
 .row{ display:flex; justify-content:space-between; margin:5px 0; }
 .start{ width:100%; margin-top:10px; }
