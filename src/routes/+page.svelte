@@ -611,11 +611,14 @@ button.next-btn:disabled{
 .fail{ background:#f44336; }
 
 .center{ flex:1; position:relative; display:flex; justify-content:center; align-items:center; min-width:0; min-height:0; overflow:hidden; container-type:size; }
+/* コンテナクエリ(cqw/cqh)はgridSizeをその場で変更した直後に
+   再計算されずグリッドが崩れることがあったため、幅の決め打ち計算
+   (vw - 左右パネル分)に置き換えている。352px = (200px+200px)*0.88 */
 .grid{
   display:grid;
   gap:clamp(4px, 1vmin, 10px);
-  width:min(88cqw, 88cqh);
-  height:min(88cqw, 88cqh);
+  width:min(calc(88vw - 352px), 88vh);
+  height:min(calc(88vw - 352px), 88vh);
 }
 .cell{ background:#666; aspect-ratio:1/1; border-radius:10px; display:flex; align-items:center; justify-content:center; }
 .cell.active{ background:yellow; }
@@ -797,6 +800,8 @@ button.next-btn:disabled{
 @media (max-width: 1000px){
   /* 左右パネルは常にセットで同じ幅にする(片方だけ縮めると中央がズレるため) */
   .app{ grid-template-columns:160px 1fr 160px; }
+  /* 282px = (160px+160px)*0.88 */
+  .grid{ width:min(calc(88vw - 282px), 88vh); height:min(calc(88vw - 282px), 88vh); }
 }
 
 @media (max-width: 820px){
