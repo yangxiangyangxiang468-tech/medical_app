@@ -378,6 +378,7 @@ function endSession(){
 </div>
 
 <div class="center">
+{#key gridSize}
 <div class="grid" style="grid-template-columns:repeat({gridSize},1fr); grid-template-rows:repeat({gridSize},1fr)">
 {#each cells as i (i)}
 <button class="cell"
@@ -392,6 +393,7 @@ aria-label={`セル ${i+1}`}>
 </button>
 {/each}
 </div>
+{/key}
 {#if countdownText}
 <div class="countdown-overlay">{countdownText}</div>
 {/if}
