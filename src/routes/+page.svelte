@@ -497,8 +497,11 @@ aria-label={`セル ${i+1}`}>
 {/if}
 
 <style>
-.app{ display:flex; height:100vh; height:100svh; overflow:hidden; background:#888; }
-.left{ width:200px; min-width:160px; padding:10px; box-sizing:border-box; background:#ddd; overflow-y:auto; scrollbar-width:none; }
+/* 3カラムをgrid-template-columnsで一括指定し、左右パネル幅が
+   常に同じ値になるよう保証する(以前はflex+個別width指定で
+   左右がズレる不具合があった)。 */
+.app{ display:grid; grid-template-columns:200px 1fr 200px; grid-template-rows:minmax(0,1fr); height:100vh; height:100svh; overflow:hidden; background:#888; }
+.left{ min-width:0; padding:10px; box-sizing:border-box; background:#ddd; overflow-y:auto; scrollbar-width:none; }
 .left::-webkit-scrollbar{ display:none; }
 .row{ display:flex; justify-content:space-between; margin:5px 0; }
 .start{ width:100%; margin-top:10px; }
@@ -751,8 +754,7 @@ button.next-btn:disabled{
 }
 
 .round-status-panel{
- width:200px;
- min-width:140px;
+ min-width:0;
  background:#eee;
  padding:10px;
  overflow-y:auto;
@@ -793,11 +795,12 @@ button.next-btn:disabled{
 }
 
 @media (max-width: 1000px){
-  .round-status-panel{ width:160px; }
+  /* 左右パネルは常にセットで同じ幅にする(片方だけ縮めると中央がズレるため) */
+  .app{ grid-template-columns:160px 1fr 160px; }
 }
 
 @media (max-width: 820px){
-  .app{ flex-direction:column; height:100vh; height:100svh; overflow:hidden; }
+  .app{ display:flex; flex-direction:column; height:100vh; height:100svh; overflow:hidden; }
   .left{ width:100%; display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; gap:8px; max-height:35vh; overflow-y:auto; flex-shrink:0; }
   .left > div, .left > button { flex-shrink:0; }
   .center{ width:100%; flex:1; min-height:0; padding:4px 0; }
